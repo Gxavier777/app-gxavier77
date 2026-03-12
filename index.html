@@ -1,0 +1,425 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GX Training V20</title>
+<style>
+body{font-family:system-ui,Arial;margin:0;background:#f4f6fb;color:#1f2937;}
+header{padding:16px;font-size:22px;font-weight:700;}
+.container{padding:16px;padding-bottom:90px;}
+.card{background:white;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,0.06);}
+button{padding:10px 14px;border-radius:8px;border:none;background:#2563eb;color:white;cursor:pointer;margin-top:8px;}
+.controls button{background:#e5e7eb;color:black;margin:2px;}
+.small{font-size:13px;color:#6b7280;margin-top:4px;}
+.set{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:6px 0;}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;border-top:1px solid #eee;padding:10px 0;}
+.bottomnav div{cursor:pointer;font-size:13px;}
+.hidden{display:none;}
+textarea{width:100%;height:110px;border-radius:8px;border:1px solid #ddd;padding:10px;}
+.sublist button{display:block;width:100%;background:#e5e7eb;color:black;margin-top:4px;}
+pre{white-space:pre-wrap;font-family:monospace;font-size:13px;}
+</style>
+</head>
+
+<body>
+
+<header>GX Training</header>
+
+<div class="container">
+
+<div id="home">
+
+<div class="card">
+<b>Perfil</b>
+<div class="small">
+Idade: 33<br>
+Altura: 1.75m<br>
+Peso: 78kg<br>
+BF estimado: ~25%<br>
+Experiência: 5 anos musculação
+</div>
+</div>
+
+<div class="card">
+<b>Objetivos</b>
+<div class="small">
+• Ganhar massa magra<br>
+• Reduzir gordura abdominal<br>
+• Prioridade: Peito e Ombro<br>
+• Manter cardio
+</div>
+</div>
+
+<div class="card">
+<b>Selecionar treino</b>
+
+<button onclick="startWorkout(0)">Treino 1 — Peito Força</button>
+<button onclick="startWorkout(1)">Treino 2 — Pernas Força</button>
+<button onclick="startWorkout(2)">Treino 3 — Costas + Bíceps</button>
+<button onclick="startWorkout(3)">Treino 4 — Peito Hipertrofia</button>
+<button onclick="startWorkout(4)">Treino 5 — Pernas Funcional</button>
+<button onclick="startWorkout(5)">Treino 6 — Ombro + Cardio</button>
+
+</div>
+
+</div>
+
+<div id="workoutScreen" class="hidden">
+
+<div class="card">
+<h3 id="exerciseName"></h3>
+
+<div id="lastHistory" class="small"></div>
+
+<div id="sets"></div>
+</div>
+
+<div class="card">
+<button onclick="prevExercise()">Exercício anterior</button>
+<button onclick="nextExercise()">Próximo exercício</button>
+<button onclick="toggleSub()">Substituir exercício</button>
+<button onclick="finishWorkout()">Finalizar treino</button>
+
+<div id="subOptions" class="sublist hidden"></div>
+</div>
+
+</div>
+
+<div id="feedback" class="hidden">
+
+<div class="card">
+<b>Percepção</b>
+<select id="effort">
+<option>Moderado</option>
+<option>Pesado</option>
+<option>Muito pesado</option>
+<option>Fácil</option>
+</select>
+</div>
+
+<div class="card">
+<b>Feedback</b>
+<textarea id="feedbackText"></textarea>
+<button onclick="saveFeedback()">Salvar</button>
+</div>
+
+</div>
+
+<div id="summary" class="hidden">
+
+<div class="card">
+
+<b>Resumo do treino</b>
+
+<pre id="summaryContent"></pre>
+
+<button onclick="generateSummary()">Gerar resumo</button>
+<button onclick="copySummary()">Copiar resumo</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="bottomnav">
+<div onclick="show('home')">Home</div>
+<div onclick="show('feedback')">Feedback</div>
+<div onclick="show('summary')">Resumo</div>
+</div>
+
+<script>
+
+const workouts=[
+
+[
+{name:"Supino reto",sets:5,reps:6,weight:20},
+{name:"Supino inclinado halter",sets:4,reps:10,weight:18},
+{name:"Crossover",sets:3,reps:12,weight:10},
+{name:"Desenvolvimento halter",sets:4,reps:10,weight:14},
+{name:"Elevação lateral",sets:3,reps:15,weight:7},
+{name:"Tríceps corda",sets:3,reps:15,weight:17.5}
+],
+
+[
+{name:"Agachamento",sets:5,reps:5,weight:30},
+{name:"Hip thrust",sets:4,reps:10,weight:30},
+{name:"Leg press",sets:3,reps:10,weight:85},
+{name:"Panturrilha",sets:4,reps:15,weight:0},
+{name:"Prancha",sets:3,reps:60,weight:0}
+],
+
+[
+{name:"Puxada frente",sets:4,reps:10,weight:50},
+{name:"Remada máquina",sets:4,reps:10,weight:50},
+{name:"Pullover cabo",sets:3,reps:15,weight:25},
+{name:"Face pull",sets:3,reps:15,weight:15},
+{name:"Rosca direta",sets:3,reps:12,weight:20},
+{name:"Rosca martelo",sets:3,reps:12,weight:10}
+],
+
+[
+{name:"Supino inclinado halter",sets:4,reps:12,weight:20},
+{name:"Supino máquina",sets:3,reps:12,weight:45},
+{name:"Crossover",sets:3,reps:15,weight:12},
+{name:"Desenvolvimento halter",sets:4,reps:12,weight:14},
+{name:"Elevação lateral",sets:3,reps:15,weight:8},
+{name:"Tríceps corda",sets:3,reps:15,weight:17.5}
+],
+
+[
+{name:"Leg press",sets:4,reps:10,weight:90},
+{name:"Afundo andando",sets:3,reps:10,weight:10},
+{name:"Hip thrust",sets:4,reps:10,weight:30},
+{name:"Panturrilha",sets:4,reps:15,weight:0},
+{name:"Prancha",sets:3,reps:60,weight:0}
+],
+
+[
+{name:"Desenvolvimento halter",sets:4,reps:10,weight:14},
+{name:"Elevação lateral",sets:3,reps:15,weight:8},
+{name:"Crucifixo inverso",sets:3,reps:15,weight:10},
+{name:"Tríceps corda",sets:3,reps:15,weight:17.5}
+]
+
+]
+
+const substitutions={
+"Supino reto":["Supino halter","Chest press máquina","Push-up"],
+"Supino inclinado halter":["Supino inclinado barra","Chest press inclinado","Máquina peitoral"],
+"Crossover":["Peck deck","Cross unilateral","Fly halter"],
+"Desenvolvimento halter":["Desenvolvimento barra","Shoulder press máquina","Arnold press"],
+"Elevação lateral":["Elevação cabo","Elevação unilateral","Máquina deltoide"],
+"Tríceps corda":["Tríceps barra","Tríceps banco","Kickback"],
+"Agachamento":["Hack machine","Leg press","Smith squat"],
+"Hip thrust":["Glute bridge","Hip thrust máquina","Smith hip thrust"],
+"Leg press":["Hack machine","Smith squat","Bulgarian split squat"],
+"Panturrilha":["Panturrilha sentado","Panturrilha leg press","Panturrilha smith"],
+"Prancha":["Dead bug","Hollow hold","Ab wheel"],
+"Puxada frente":["Pull-up assistido","Puxada neutra","Remada baixa"],
+"Remada máquina":["Remada halter","Remada barra","Remada baixa"],
+"Pullover cabo":["Pullover halter","Pullover máquina","Straight arm pulldown"],
+"Face pull":["Crucifixo inverso","Reverse fly","Remada alta leve"],
+"Rosca direta":["Rosca barra EZ","Rosca cabo","Rosca alternada"],
+"Rosca martelo":["Rosca inclinada","Rosca cross-body","Rosca corda"],
+"Supino máquina":["Supino barra","Supino halter","Chest press"],
+"Afundo andando":["Bulgarian split squat","Step up","Lunge smith"],
+"Crucifixo inverso":["Reverse fly máquina","Face pull","Rear delt cabo"]
+}
+
+let workout=[]
+let currentExercise=0
+let setsData=[]
+let workoutData=[]
+let effortLevel=""
+let feedbackText=""
+
+function show(id){
+["home","workoutScreen","feedback","summary"].forEach(x=>{
+let el=document.getElementById(x)
+if(el) el.classList.add("hidden")
+})
+document.getElementById(id).classList.remove("hidden")
+}
+
+function startWorkout(index){
+workout=JSON.parse(JSON.stringify(workouts[index]))
+currentExercise=0
+workoutData=[]
+show("workoutScreen")
+renderExercise()
+}
+
+function renderExercise(){
+
+const ex=workout[currentExercise]
+
+document.getElementById("exerciseName").innerText=ex.name
+
+showLastHistory(ex.name)
+
+setsData=[]
+const setsDiv=document.getElementById("sets")
+setsDiv.innerHTML=""
+
+for(let i=0;i<ex.sets;i++){
+
+setsData.push({reps:ex.reps,weight:ex.weight})
+
+let row=document.createElement("div")
+row.className="set"
+
+row.innerHTML=`
+Set ${i+1}
+<div class="controls">
+<button onclick="changeWeight(${i},-1)">-</button>
+<span id="w${i}">${ex.weight}</span>kg
+<button onclick="changeWeight(${i},1)">+</button>
+<button onclick="changeReps(${i},-1)">-</button>
+<span id="r${i}">${ex.reps}</span>
+<button onclick="changeReps(${i},1)">+</button>
+</div>`
+
+setsDiv.appendChild(row)
+
+}
+
+}
+
+function showLastHistory(name){
+
+let history=JSON.parse(localStorage.getItem("gx_history")||"{}")
+
+let el=document.getElementById("lastHistory")
+
+if(history[name]){
+
+let h=history[name]
+
+let txt="Último treino: "
+
+h.forEach(s=>{
+
+txt+=s.weight+"kg "+s.reps+" | "
+
+})
+
+el.innerText=txt
+
+}else{
+
+el.innerText=""
+
+}
+
+}
+
+function changeWeight(i,v){
+setsData[i].weight+=v
+document.getElementById("w"+i).innerText=setsData[i].weight
+}
+
+function changeReps(i,v){
+setsData[i].reps+=v
+document.getElementById("r"+i).innerText=setsData[i].reps
+}
+
+function saveExercise(){
+
+workoutData.push({
+exercise:workout[currentExercise].name,
+planned:workout[currentExercise],
+sets:[...setsData]
+})
+
+let history=JSON.parse(localStorage.getItem("gx_history")||"{}")
+
+history[workout[currentExercise].name]=setsData
+
+localStorage.setItem("gx_history",JSON.stringify(history))
+
+}
+
+function prevExercise(){
+if(currentExercise>0){
+saveExercise()
+currentExercise--
+renderExercise()
+}
+}
+
+function nextExercise(){
+if(currentExercise<workout.length-1){
+saveExercise()
+currentExercise++
+renderExercise()
+}
+}
+
+function toggleSub(){
+
+let name=workout[currentExercise].name
+let opts=substitutions[name]||[]
+
+let box=document.getElementById("subOptions")
+box.innerHTML=""
+
+opts.forEach(o=>{
+
+let b=document.createElement("button")
+b.innerText=o
+
+b.onclick=()=>{
+
+workout[currentExercise].name=o
+
+box.classList.add("hidden")
+
+renderExercise()
+
+}
+
+box.appendChild(b)
+
+})
+
+box.classList.toggle("hidden")
+
+}
+
+function finishWorkout(){
+saveExercise()
+show("feedback")
+}
+
+function saveFeedback(){
+effortLevel=document.getElementById("effort").value
+feedbackText=document.getElementById("feedbackText").value
+alert("Feedback salvo")
+}
+
+function generateSummary(){
+
+let summary="GX TRAINING RESUMO\n\n"
+
+workoutData.forEach(ex=>{
+
+summary+=ex.exercise+"\n"
+
+ex.sets.forEach((s,i)=>{
+
+let planned=ex.planned.reps
+let status="OK"
+
+if(s.reps>planned) status="↑ acima"
+if(s.reps<planned) status="↓ abaixo"
+
+summary+=s.weight+"kg "+s.reps+" reps ("+status+")\n"
+
+})
+
+summary+="\n"
+
+})
+
+summary+="PERCEPÇÃO\n"+effortLevel+"\n\n"
+summary+="FEEDBACK\n"+feedbackText+"\n"
+
+document.getElementById("summaryContent").innerText=summary
+
+}
+
+function copySummary(){
+
+let text=document.getElementById("summaryContent").innerText
+navigator.clipboard.writeText(text)
+alert("Resumo copiado")
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GX Training</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>GX Training</header>
+
+<div class="container">
+
+<div class="card">
+<h3>Perfil</h3>
+Idade: 33<br>
+Altura: 1.75m<br>
+Peso: 78kg<br>
+BF estimado: ~25%
+</div>
+
+<div class="card">
+<h3>Objetivos</h3>
+<ul>
+<li>Ganhar massa magra</li>
+<li>Reduzir gordura abdominal</li>
+<li>Prioridade: Peito e Ombro</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>Treinos</h3>
+
+<button onclick="startWorkout(1)">Treino 1 — Peito Força</button>
+<button onclick="startWorkout(2)">Treino 2 — Pernas Força</button>
+<button onclick="startWorkout(3)">Treino 3 — Costas + Bíceps</button>
+<button onclick="startWorkout(4)">Treino 4 — Peito Hipertrofia</button>
+<button onclick="startWorkout(5)">Treino 5 — Pernas Funcional</button>
+<button onclick="startWorkout(6)">Treino 6 — Ombro + Cardio</button>
+
+</div>
+
+<div id="workoutCard" class="card hidden">
+<h3 id="exerciseTitle"></h3>
+<div id="sets"></div>
+
+<div class="rest">
+Descanso:
+<button onclick="startRest(30)">30s</button>
+<button onclick="startRest(45)">45s</button>
+<button onclick="startRest(60)">60s</button>
+<button onclick="startRest(90)">90s</button>
+<button onclick="startRest(120)">120s</button>
+<span id="restTimer"></span>
+</div>
+
+<div class="nav">
+<button onclick="prevExercise()">Exercício anterior</button>
+<button onclick="nextExercise()">Próximo exercício</button>
+<button onclick="finishWorkout()">Finalizar treino</button>
+</div>
+
+</div>
+
+<div id="feedbackCard" class="card hidden">
+<h3>Feedback</h3>
+<textarea id="feedback"></textarea>
+<br>
+<button onclick="generateSummary()">Gerar resumo</button>
+</div>
+
+<div id="summaryCard" class="card hidden">
+<h3>Resumo do treino</h3>
+<pre id="summary"></pre>
+</div>
+
+</div>
+
+<script src="workouts.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
